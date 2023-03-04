@@ -1,7 +1,10 @@
 import { Typography } from '@mui/material'
+import { useQuery } from '@tanstack/react-query'
 
 const HomePage: React.FC = () => {
-  return <Typography>Home</Typography>
+  const { data: ping } = useQuery<string>(['/ping'])
+
+  return <Typography>ping: {ping}</Typography>
 }
 
 export default HomePage
