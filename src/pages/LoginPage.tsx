@@ -1,3 +1,6 @@
+import { AUTH_TOKEN_KEY } from '../constants'
+import api from '../hooks/api'
+import { AxiosErrorWithMessage } from '../types/auth/error'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Checkbox from '@mui/material/Checkbox'
@@ -7,7 +10,11 @@ import Grid from '@mui/material/Grid'
 import Link from '@mui/material/Link'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
+import { useMutation } from '@tanstack/react-query'
+import { AxiosResponse } from 'axios'
 import * as React from 'react'
+import { useForm } from 'react-hook-form'
+import { useNavigate } from 'react-router-dom'
 
 const Signature = (props: any) => {
   return (
@@ -26,15 +33,37 @@ const Signature = (props: any) => {
   )
 }
 
+type formType = {
+  email: string
+  password: string
+}
+
 const LoginPage: React.FC = () => {
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    const data = new FormData(event.currentTarget)
-    console.log({
-      email: data.get('email'),
-      password: data.get('password'),
-    })
-  }
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<formType>()
+
+  const navigate = useNavigate()
+
+  const onSubmit = useMutation(
+    (body: formType) => api.post('/login', { ...body }),
+    {
+      onSuccess: (data: AxiosResponse) => {
+        localStorage.setItem(AUTH_TOKEN_KEY, data.data.access_token)
+
+        api.defaults.headers.common[
+          'Authorization'
+        ] = `Bearer ${localStorage.getItem(AUTH_TOKEN_KEY)}`
+
+        navigate('/')
+      },
+      onError: (error: AxiosErrorWithMessage) => {
+        console.log(error?.response?.data?.message)
+      },
+    }
+  )
 
   return (
     <Container
@@ -63,7 +92,7 @@ const LoginPage: React.FC = () => {
 
         <Box
           component="form"
-          onSubmit={handleSubmit}
+          onSubmit={handleSubmit((body) => onSubmit.mutate(body))}
           noValidate
           sx={{
             display: 'flex',
@@ -80,19 +109,25 @@ const LoginPage: React.FC = () => {
             fullWidth
             id="email"
             label="Email"
-            name="email"
             autoComplete="email"
+            error={!!errors?.email}
             autoFocus
+            {...register('email', { required: true, pattern: /^\S+@\S+$/i })}
           />
           <TextField
             margin="normal"
             required
             fullWidth
-            name="senha"
             label="Senha"
             type="password"
             id="password"
+            error={!!errors?.password}
             autoComplete="current-password"
+            {...register('password', {
+              required: true,
+              maxLength: 30,
+              minLength: 4,
+            })}
           />
           <FormControlLabel
             sx={{ width: '100%' }}

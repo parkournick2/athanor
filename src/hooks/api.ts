@@ -26,7 +26,9 @@ api.interceptors.response.use(
     if (error?.response?.status === 401) {
       api.defaults.headers.common['Authorization'] = null
       localStorage.removeItem(AUTH_TOKEN_KEY)
-      window.location.href = '/login'
+      if (error?.request?.responseURL !== `${API_BASE_URL}/login`) {
+        window.location.href = '/login'
+      }
     }
 
     return Promise.reject(error)

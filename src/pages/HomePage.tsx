@@ -1,10 +1,10 @@
+import { useCurrentUser } from '../hooks/useCurrentUser'
 import { Typography } from '@mui/material'
-import { useQuery } from '@tanstack/react-query'
 
 const HomePage: React.FC = () => {
-  const { data: ping } = useQuery<string>(['/ping'])
+  const { user } = useCurrentUser()
 
-  return <Typography>ping: {ping}</Typography>
+  return <Typography>loggedUser: {JSON.stringify(user)}</Typography>
 }
 
 export default HomePage
