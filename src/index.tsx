@@ -1,4 +1,4 @@
-import App from './App'
+import Routes from './Routes'
 import { theme } from './theme/theme'
 import { CssBaseline, ThemeProvider } from '@mui/material'
 import React from 'react'
@@ -10,7 +10,7 @@ root.render(
   <React.StrictMode>
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <App />
+      <Routes />
     </ThemeProvider>
   </React.StrictMode>
 )
